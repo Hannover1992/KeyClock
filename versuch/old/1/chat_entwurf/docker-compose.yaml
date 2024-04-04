@@ -1,0 +1,25 @@
+
+version: '2'
+
+services:
+  keycloak:
+    image: jboss/keycloak
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - DB_VENDOR=mssql
+      - DB_ADDR=ip_of_your_mssql_server
+      - DB_DATABASE=keycloak
+      - DB_USER=keycloak
+      - DB_PASSWORD=your_mssql_db_password
+    ports:
+      - "8080:8080"
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=your_mssql_db_password
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"

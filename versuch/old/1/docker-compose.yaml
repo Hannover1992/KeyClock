@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.2  # Verwenden Sie die aktuellste Version falls möglich
+    environment:
+      - KEYCLOAK_USER=admin  # Admin-Benutzernamen definieren
+      - KEYCLOAK_PASSWORD=admin  # Admin-Passwort definieren
+
+      # - DB_VENDOR=mssql  # Legen Sie dies auf mssql, da Sie Microsoft SQL Server verwenden wollen
+      # - DB_ADDR=ip_of_your_mssql_server  # Die Adresse Ihrer SQL Server Instanz
+      # - DB_DATABASE=your_db_name  # Der Name Ihrer Datenbank
+      # - DB_USER=your_db_user  # Benutzername für die Datenbank
+      # - DB_PASSWORD=your_db_password  # Passwort für den Benutzer
+    ports:
+      - '8080:8080'  # Den Port von Keycloak für den Zugriff vom Host-System freigeben
