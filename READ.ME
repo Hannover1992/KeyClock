@@ -1,0 +1,94 @@
+```markdown
+# Keycloak mit Microsoft SQL Server
+
+Dieses README beschreibt die Schritte zum Einrichten eines Keycloak-Servers mit einer externen Microsoft SQL Server-Datenbank.
+
+## Voraussetzungen
+
+- Docker installiert auf Ihrem Rechner
+- Grundkenntnisse in der Verwendung von Docker und Docker Compose
+- Zugriffsrechte, um Services auf Ihrem Host-System zu starten
+
+## Schritt 1: SQL Server Container erstellen
+
+### Netzwerk in Docker erstellen
+
+Zunächst erstellen Sie ein Netzwerk, damit Ihre Container miteinander kommunizieren können:
+
+```bash
+docker network create keycloak-net
+```
+
+### Starten des Microsoft SQL Server Containers
+
+Starten Sie nun den SQL Server Container mit folgendem Befehl:
+
+```bash
+docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=IhrStarkesPasswort' \
+--name mssql-server --network keycloak-net \
+-e 'MSSQL_PID=Express' -p 1433:1433 \
+-d mcr.microsoft.com/mssql/server:2019-latest
+```
+
+Ersetzen Sie `IhrStarkesPasswort` mit einem sicheren Passwort Ihrer Wahl.
+
+## Schritt 2: Keycloak Container erstellen
+
+### Docker Compose Datei erstellen
+
+Erstellen Sie eine `docker-compose.yaml` mit folgendem Inhalt:
+
+```yaml
+version: '2'
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:12.0.1
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - DB_VENDOR=mssql
+      - DB_ADDR=mssql-server
+      - DB_DATABASE=keycloak
+      - DB_USER=sa
+      - DB_PASSWORD=IhrStarkesPasswort
+    ports:
+      - "8080:8080"
+    networks:
+      - keycloak-net
+networks:
+  keycloak-net:
+    external: true
+```
+
+### Docker Compose ausführen
+
+Navigieren Sie in das Verzeichnis, in dem sich Ihre `docker-compose.yaml` befindet und starten Sie die Services:
+
+```bash
+docker-compose up -d
+```
+
+Keycloak wird im Hintergrund gestartet und verwendet die SQL Server-Datenbank, die im `keycloak-net` Netzwerk verfügbar ist.
+
+## Schritt 3: Datenbank initialisieren
+
+Keycloak initialisiert beim ersten Start die erforderlichen Tabellen und Daten in der SQL Server-Datenbank.
+
+## Schritt 4: Keycloak Verwaltung
+
+### Keycloak Admin Console
+
+Öffnen Sie Ihren Browser und navigieren Sie zu `http://localhost:8080`. Melden Sie sich mit dem `admin` Benutzer und dem festgelegten Passwort an.
+
+### Konfiguration
+
+Konfigurieren Sie Ihre Realms, Benutzer und Einstellungen in Keycloak.
+
+## Sicherheitshinweis
+
+Achten Sie darauf, dass Sie sichere Passwörter verwenden und diese niemals unverschlüsselt speichern oder in Versionsverwaltungssysteme hochladen.
+
+## Netzwerk und Datenbank in separaten Docker-Containern
+
+Wenn Sie den SQL Server in einem separaten Docker-Container ausführen möchten, stellen Sie sicher, dass Sie das `keycloak-net` Netzwerk verwenden, damit Keycloak eine Verbindung zur Datenbank herstellen kann.
+```
