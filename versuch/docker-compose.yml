@@ -10,4 +10,9 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
     command:
       - start-dev
+    networks:
+      - keycloak-net
+networks:
+  keycloak-net:
+    external: true
 
